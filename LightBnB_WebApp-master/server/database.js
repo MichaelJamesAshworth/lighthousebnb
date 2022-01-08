@@ -22,7 +22,8 @@ const getUserWithEmail = function (email) {
     FROM users
     WHERE users.email = $1
     `;
-  const values = [email.toLocaleLowerCase];
+  const values = [email];
+  console.log("test:", values);
   return pool
     .query(queryString, values)
     .then((res) => res.rows[0])
@@ -76,7 +77,17 @@ exports.addUser = addUser;
  * @return {Promise<[{}]>} A promise to the reservations.
  */
 const getAllReservations = function (guest_id, limit = 10) {
-  return getAllProperties(null, 2);
+  const queryString = `
+  SELECT * FROM reservations
+  WHERE guest_id = $1
+  limit $2
+  `;
+  const values = [guest_id, limit];
+  console.log("in here all reservations", values);
+  return pool
+    .query(queryString, values)
+    .then((res) => res.rows)
+    .catch((err) => console.log(err.message));
 };
 exports.getAllReservations = getAllReservations;
 
@@ -94,11 +105,9 @@ const getAllProperties = function (options, limit = 10) {
   FROM properties
   LIMIT $1;
   `;
-  pool
+  return pool
     .query(queryString, [limit])
-    .then((result) => {
-      console.log(result.rows);
-    })
+    .then((result) => result.rows)
     .catch((err) => {
       console.log(err.message);
     });
